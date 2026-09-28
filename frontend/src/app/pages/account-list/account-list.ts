@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
@@ -19,6 +19,12 @@ export class AccountList implements OnInit {
   readonly errorMessage = signal<string | null>(null);
   readonly successMessage = signal<string | null>(null);
   readonly submitting = signal(false);
+  readonly search = signal('');
+
+  readonly filteredAccounts = computed(() => {
+    const term = this.search().trim().toLowerCase();
+    return this.accounts().filter((account) => account.holderName.toLowerCase().includes(term));
+  });
 
   readonly form = new FormGroup({
     holderName: new FormControl('', {

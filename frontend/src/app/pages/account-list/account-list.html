@@ -20,6 +20,15 @@
   <p class="success">{{ successMessage() }}</p>
 }
 
+<p>
+  <input
+    #searchBox
+    placeholder="Search by name"
+    aria-label="Search accounts by name"
+    (input)="search.set(searchBox.value)"
+  />
+</p>
+
 <table>
   <thead>
     <tr>
@@ -30,7 +39,7 @@
     </tr>
   </thead>
   <tbody>
-    @for (account of accounts(); track account.id) {
+    @for (account of filteredAccounts(); track account.id) {
       <tr>
         <td>{{ account.id }}</td>
         <td>{{ account.holderName }}</td>
@@ -39,7 +48,13 @@
       </tr>
     } @empty {
       <tr>
-        <td colspan="4">No accounts yet. Create one above.</td>
+        <td colspan="4">
+          @if (accounts().length) {
+            No accounts match "{{ search() }}".
+          } @else {
+            No accounts yet. Create one above.
+          }
+        </td>
       </tr>
     }
   </tbody>
