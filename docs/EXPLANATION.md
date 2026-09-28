@@ -74,7 +74,7 @@ sequenceDiagram
     N->>C: forward to backend:8080
     C->>C: @Valid checks the request (400 if invalid)
     C->>S: recordEntry(1, request)
-    S->>DB: BEGIN; SELECT account FOR UPDATE
+    S->>DB: BEGIN, then SELECT account FOR UPDATE
     S->>S: check funds (422 if insufficient), compute new balance
     S->>DB: INSERT ledger_entries
     S->>DB: COMMIT (Hibernate flushes UPDATE accounts, lock released)
