@@ -17,7 +17,9 @@ Built with Angular, Spring Boot and PostgreSQL. Everything runs in Docker with o
 - Error responses in the standard Problem Details format (RFC 9457)
 - Entries can't be edited or deleted, the ledger is append-only
 - Safe when two requests hit the same account at the same time (row lock)
+- Search accounts by name
 - Swagger UI for the API
+- Health check at `/api/health` (also checks the database)
 
 ## Tech Stack
 
@@ -28,7 +30,7 @@ Built with Angular, Spring Boot and PostgreSQL. Everything runs in Docker with o
 | Database | PostgreSQL 17 |
 | Data access | Spring Data JPA / Hibernate |
 | Migrations | Flyway |
-| Other backend libs | Lombok, springdoc-openapi (Swagger UI) |
+| Other backend libs | Lombok, springdoc-openapi (Swagger UI), Spring Boot Actuator |
 | Tests | JUnit, Mockito, AssertJ |
 | Frontend tooling | ESLint, Prettier |
 | Web server | Nginx (serves the Angular build and proxies `/api`) |
@@ -84,6 +86,7 @@ Base path is `/api`.
 | GET | `/api/accounts/{id}` | - | 200 + account | 404 |
 | POST | `/api/accounts/{id}/entries` | `{ "type": "DEBIT", "amount": 30.00, "description": "Rent" }` | 201 + entry | 400, 404, 422 |
 | GET | `/api/accounts/{id}/entries` | - | 200 + list of entries (oldest first) | 404 |
+| GET | `/api/health` | - | 200 `{"status":"UP"}` | 503 if the database is down |
 
 Example account:
 
@@ -104,7 +107,7 @@ Example error (422):
   "detail": "Insufficient funds: balance is 70.00, debit is 1000", "instance": "/api/accounts/1/entries" }
 ```
 
-400 is used when the request itself is invalid (blank name, negative amount, more than 2 decimals, bad JSON). Validation errors also include an `errors` object with a message per field. 404 is used for an unknown account id, also on the statement endpoint. 422 is used when the request is valid but the debit is bigger than the balance.
+400 is used when the request itself is invalid (blank name, negative amount, more than 2 decimals, bad JSON). Validation errors also include an `errors` object with a message per field. 404 is used for an unknown account id, also on the statement endpoint. 422 is used when the request is valid but the debit is bigger than the balance. If a database constraint ever rejects a write (for example the `balance >= 0` check), the API answers 409 instead of a 500.
 
 ## How It Works
 
@@ -143,6 +146,23 @@ Money is `BigDecimal` in Java and `NUMERIC(19,2)` in the database, never `double
 Errors: the services throw `AccountNotFoundException` or `InsufficientFundsException`, and a `@RestControllerAdvice` class turns them into 404 / 422 Problem Details. `@Valid` failures become 400. In Angular, `toErrorMessage()` reads the `detail` field and the page shows it.
 
 More detail is in [docs/EXPLANATION.md](docs/EXPLANATION.md). The design I wrote before coding is in [docs/design.md](docs/design.md).
+
+## Tests
+
+Start the database first (`docker compose up -d db`), then run `./mvnw test` inside `backend`.
+
+| Test | What it checks |
+|---|---|
+| `credit_increasesBalance` | A credit adds to the balance and the entry stores the new balance |
+| `debit_reducesBalance_andStoresRunningBalance` | A debit subtracts, and `balanceAfter` matches the account balance |
+| `debit_exactlyEqualToBalance_isAllowed` | The boundary: debiting the whole balance leaves 0.00 instead of failing |
+| `debit_moreThanBalance_throwsInsufficientFunds_andSavesNothing` | An overdraft throws, nothing is saved and the balance is unchanged |
+| `unknownAccount_throwsAccountNotFound` | An unknown account id is rejected (404 in the API) |
+| `contextLoads` | The whole app starts: Flyway runs and Hibernate validates the entities against the tables |
+
+The first five are in `LedgerServiceTest`. They use Mockito mocks instead of the database, so they run in about a second.
+
+To make sure the tests really protect the rules, I changed the funds check in `LedgerService` from `< 0` to `<= 0` on purpose. `debit_exactlyEqualToBalance_isAllowed` failed as expected, and then I reverted the change.
 
 ## Project Structure
 
