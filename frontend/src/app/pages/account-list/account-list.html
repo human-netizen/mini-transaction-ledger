@@ -1,1 +1,42 @@
-<p>account-list works!</p>
+<h1>Accounts</h1>
+
+<form [formGroup]="form" (ngSubmit)="onSubmit()" class="card">
+  <label>
+    Holder name
+    <input formControlName="holderName" placeholder="e.g. Rahim" />
+  </label>
+  <button type="submit" [disabled]="submitting()">Create account</button>
+</form>
+
+@if (form.controls.holderName.touched && form.controls.holderName.invalid) {
+  <p class="error">Name is required (max 100 characters).</p>
+}
+
+@if (errorMessage()) {
+  <p class="error">{{ errorMessage() }}</p>
+}
+
+<table>
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Holder</th>
+      <th class="num">Balance</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    @for (account of accounts(); track account.id) {
+      <tr>
+        <td>{{ account.id }}</td>
+        <td>{{ account.holderName }}</td>
+        <td class="num">{{ account.balance | number: '1.2-2' }}</td>
+        <td><a [routerLink]="['/accounts', account.id]">View →</a></td>
+      </tr>
+    } @empty {
+      <tr>
+        <td colspan="4">No accounts yet. Create one above.</td>
+      </tr>
+    }
+  </tbody>
+</table>
