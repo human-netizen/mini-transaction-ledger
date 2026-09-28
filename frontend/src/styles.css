@@ -78,6 +78,9 @@ td {
 .error {
   color: #b00020;
 }
+.success {
+  color: #1b7f3b;
+}
 .credit {
   color: #1b7f3b;
 }

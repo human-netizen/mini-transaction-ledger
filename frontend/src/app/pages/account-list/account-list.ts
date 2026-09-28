@@ -17,6 +17,7 @@ export class AccountList implements OnInit {
 
   readonly accounts = signal<Account[]>([]);
   readonly errorMessage = signal<string | null>(null);
+  readonly successMessage = signal<string | null>(null);
   readonly submitting = signal(false);
 
   readonly form = new FormGroup({
@@ -44,9 +45,11 @@ export class AccountList implements OnInit {
     }
     this.submitting.set(true);
     this.errorMessage.set(null);
+    this.successMessage.set(null);
 
     this.accountService.create(this.form.getRawValue()).subscribe({
-      next: () => {
+      next: (account) => {
+        this.successMessage.set(`Account created for ${account.holderName}.`);
         this.form.reset();
         this.submitting.set(false);
         this.loadAccounts();

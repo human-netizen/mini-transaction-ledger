@@ -38,6 +38,9 @@
 @if (errorMessage()) {
   <p class="error">{{ errorMessage() }}</p>
 }
+@if (successMessage()) {
+  <p class="success">{{ successMessage() }}</p>
+}
 
 <h2>Statement</h2>
 <table>

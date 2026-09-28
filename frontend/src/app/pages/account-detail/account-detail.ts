@@ -24,6 +24,7 @@ export class AccountDetail implements OnInit {
   readonly account = signal<Account | null>(null);
   readonly entries = signal<LedgerEntry[]>([]);
   readonly errorMessage = signal<string | null>(null);
+  readonly successMessage = signal<string | null>(null);
   readonly submitting = signal(false);
 
   readonly form = new FormGroup({
@@ -72,9 +73,11 @@ export class AccountDetail implements OnInit {
 
     this.submitting.set(true);
     this.errorMessage.set(null);
+    this.successMessage.set(null);
 
     this.ledgerService.addEntry(this.accountId, request).subscribe({
-      next: () => {
+      next: (entry) => {
+        this.successMessage.set(`${entry.type} of ${entry.amount.toFixed(2)} recorded.`);
         this.form.reset();
         this.submitting.set(false);
         this.loadAccount();

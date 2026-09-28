@@ -16,6 +16,10 @@
   <p class="error">{{ errorMessage() }}</p>
 }
 
+@if (successMessage()) {
+  <p class="success">{{ successMessage() }}</p>
+}
+
 <table>
   <thead>
     <tr>
