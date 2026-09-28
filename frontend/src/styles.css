@@ -1,1 +1,89 @@
-/* You can add global styles to this file, and also import other style files */
+body {
+  font-family: system-ui, sans-serif;
+  margin: 0;
+  background: #f6f7f9;
+  color: #222;
+}
+
+.app-header {
+  background: #1f3a5f;
+  padding: 12px 24px;
+}
+.app-header a {
+  color: #fff;
+  font-weight: 600;
+  text-decoration: none;
+  font-size: 1.1rem;
+}
+
+.container {
+  max-width: 900px;
+  margin: 24px auto;
+  padding: 0 16px;
+}
+
+.card {
+  background: #fff;
+  padding: 16px;
+  border-radius: 8px;
+  margin: 16px 0;
+  display: flex;
+  gap: 12px;
+  align-items: flex-end;
+  flex-wrap: wrap;
+}
+
+label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.9rem;
+}
+
+input,
+select,
+button {
+  padding: 8px;
+  font-size: 1rem;
+}
+
+button {
+  background: #1f3a5f;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+}
+th,
+td {
+  padding: 8px 12px;
+  border-bottom: 1px solid #e3e3e3;
+  text-align: left;
+}
+
+.num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.error {
+  color: #b00020;
+}
+.credit {
+  color: #1b7f3b;
+}
+.debit {
+  color: #b00020;
+}
+.balance {
+  font-size: 1.2rem;
+}
